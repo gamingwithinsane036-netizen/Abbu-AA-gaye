@@ -98,7 +98,7 @@ function bs.OpenActionMenu(fa,c4,fU,cg,es)
 	actX.MouseButton1Click:Connect(gy)
 	gq.MouseButton1Click:Connect(gy)
 	
-	local gz={"❤️","😂","💀","🔥","👍","⚡"}
+	local gz={"❤️","😂","💀","😭","👍","💔"}
 	local gA=Instance.new("Frame",gv)
 	gA.Size=UDim2.new(1,-20,0,36)
 	gA.BackgroundColor3=Color3.fromRGB(30,30,40)
