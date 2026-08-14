@@ -1,0 +1,163 @@
+-- MUST BE IN A LOCALSCRIPT INSIDE STARTERGUI
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local SoundService = game:GetService("SoundService")
+local StarterGui = game:GetService("StarterGui")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local Lighting = game:GetService("Lighting")
+
+-- ⚙️ [FPS CONTROL] Set to 20 FPS
+local ANIMATION_FPS = 20 
+local frameDuration = 1 / ANIMATION_FPS
+
+local player = Players.LocalPlayer
+while not player do task.wait() player = Players.LocalPlayer end
+local playerGui = player:WaitForChild("PlayerGui")
+
+print("👑 Zayn Pro-Master: Final 20FPS Edition Active!")
+
+-- 1. Setup UI & Hide Core
+task.spawn(function()
+    local success = false
+    while not success do
+        local s = pcall(function() StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, false) end)
+        success = s
+        task.wait(0.1)
+    end
+end)
+
+local ScreenGui = Instance.new("ScreenGui", playerGui)
+ScreenGui.Name = "ZaynMasterUI"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.IgnoreGuiInset = true
+
+local CanvasGroup = Instance.new("CanvasGroup", ScreenGui)
+CanvasGroup.Size = UDim2.new(1, 0, 1, 0)
+CanvasGroup.GroupTransparency = 1 -- Start invisible (Fade-In ready)
+
+local BackgroundFrame = Instance.new("Frame", CanvasGroup)
+BackgroundFrame.Size = UDim2.new(1, 0, 1, 0)
+BackgroundFrame.BackgroundColor3 = Color3.new(0, 0, 0)
+BackgroundFrame.BorderSizePixel = 0
+
+local CinematicBlur = Instance.new("BlurEffect", Lighting)
+CinematicBlur.Size = 0
+
+-- 2. Audio
+local BackgroundSound = Instance.new("Sound", SoundService)
+BackgroundSound.SoundId = "rbxassetid://139606677237480"
+BackgroundSound.Looped = true
+BackgroundSound.Volume = 0
+BackgroundSound:Play()
+
+-- 3. Frames
+local assetIds = {
+    120087836132147, 109963200975988, 97149734915320, 118103966656741, 110537603554824, 81324674349135, 130616996132002, 84709559097003, 139558482116845, 74558296305126,
+    79687578950167, 139480217604924, 140622541420825, 124734416654747, 122527169061964, 140693969097090, 119349731395548, 74674174190678, 76849103784008, 74678002084876,
+    117972030727042, 117972030727042, 135225071752818, 110031294425928, 107482460116536, 94219549984767, 139550931284458, 100256701862175, 100256701862175, 94243643353850,
+    123754335413105, 112912004545855, 134910404261243, 113100409630539, 103409143913767, 74490391756112, 93345885113747, 125086031328902, 131024565491990, 71593924491597,
+    107479088615544, 139287669994855, 72463454672486, 76420604584112, 121813849574152, 74109649451867, 135426149362747, 137076673329459, 102698355252016, 127632597738316,
+    83251952194727, 95270233217027, 135110739968385, 117928773285640, 117928773285640, 119570690162564, 140148138524260, 90191854019995, 87540175891946, 97543213861006,
+    119380529333473, 137874927503781
+}
+
+local imageInstances = {}
+for i, id in ipairs(assetIds) do
+    local img = Instance.new("ImageLabel", BackgroundFrame)
+    img.Size = UDim2.new(1,0,1,0) img.Position = UDim2.new(0.5,0,0.5,0) img.AnchorPoint = Vector2.new(0.5,0.5)
+    img.BackgroundTransparency = 1 img.ScaleType = Enum.ScaleType.Crop img.Visible = false
+    img.Image = "rbxassetid://"..id
+    table.insert(imageInstances, img)
+end
+
+-- 4. Professional Button Construction (Vignette Style Transparency)
+local function createProButton(text, pos)
+    local btn = Instance.new("TextButton", CanvasGroup)
+    btn.Size = UDim2.new(0, 140, 0, 45)
+    btn.Position = pos
+    btn.AnchorPoint = Vector2.new(0, 1)
+    btn.BackgroundColor3 = Color3.fromRGB(70, 170, 230)
+    btn.BackgroundTransparency = 0
+    btn.BorderSizePixel = 0
+    btn.Text = text
+    btn.TextColor3 = Color3.new(1, 1, 1)
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 14
+    btn.ClipsDescendants = true
+    
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 4)
+    
+    -- Solid Center -> Transparent Edges
+    local grad = Instance.new("UIGradient", btn)
+    grad.Transparency = NumberSequence.new({
+        NumberSequenceKeypoint.new(0, 1),
+        NumberSequenceKeypoint.new(0.2, 0),
+        NumberSequenceKeypoint.new(0.8, 0),
+        NumberSequenceKeypoint.new(1, 1)
+    })
+    return btn
+end
+
+local ExitBtn = createProButton("CLOSE", UDim2.new(0, 20, 1, -40))
+local ChatBtn = createProButton("ZAYN CHAT", UDim2.new(0, 170, 1, -40))
+
+-- 5. Mechanics & Animation
+for _, img in ipairs(imageInstances) do img.Visible = true end
+task.wait(0.5)
+for i, img in ipairs(imageInstances) do if i ~= 1 then img.Visible = false end end
+
+local function animateBtn(btn, normPos, hovPos)
+    btn.MouseEnter:Connect(function()
+        UserInputService.MouseIconEnabled = true
+        TweenService:Create(btn, TweenInfo.new(0.2, Enum.EasingStyle.Back), {Size = UDim2.new(0, 150, 0, 50), Position = hovPos}):Play()
+    end)
+    btn.MouseLeave:Connect(function()
+        UserInputService.MouseIconEnabled = false
+        TweenService:Create(btn, TweenInfo.new(0.2), {Size = UDim2.new(0, 140, 0, 45), Position = normPos}):Play()
+    end)
+    btn.MouseButton1Down:Connect(function()
+        TweenService:Create(btn, TweenInfo.new(0.05), {Size = UDim2.new(0, 135, 0, 40)}):Play()
+    end)
+    btn.MouseButton1Up:Connect(function()
+        TweenService:Create(btn, TweenInfo.new(0.1, Enum.EasingStyle.Back), {Size = UDim2.new(0, 150, 0, 50)}):Play()
+    end)
+end
+
+animateBtn(ExitBtn, UDim2.new(0, 20, 1, -40), UDim2.new(0, 20, 1, -38))
+animateBtn(ChatBtn, UDim2.new(0, 170, 1, -40), UDim2.new(0, 170, 1, -38))
+
+-- 6. Engine
+local idx, dir, lastUpdate = 1, 1, 0
+RunService.Heartbeat:Connect(function(dt)
+    lastUpdate = lastUpdate + dt
+    if lastUpdate >= frameDuration then
+        imageInstances[idx].Visible = false
+        idx = idx + dir
+        if idx > #imageInstances or idx < 1 then dir = -dir idx = idx + dir * 2 end
+        imageInstances[idx].Visible = true
+        lastUpdate = lastUpdate - frameDuration
+    end
+end)
+
+-- 7. Interaction & Fade-Out
+ChatBtn.MouseButton1Click:Connect(function()
+    pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/gamingwithinsane036-netizen/Abbu-AA-gaye/refs/heads/main/h8ers"))() end)
+end)
+
+ExitBtn.MouseButton1Click:Connect(function()
+    -- Fade Out Sequence
+    local fadeOut = TweenInfo.new(0.8)
+    TweenService:Create(CanvasGroup, fadeOut, {GroupTransparency = 1}):Play()
+    TweenService:Create(BackgroundSound, fadeOut, {Volume = 0}):Play()
+    TweenService:Create(CinematicBlur, fadeOut, {Size = 0}):Play()
+    
+    task.wait(0.8)
+    pcall(function() StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, true) end)
+    ScreenGui:Destroy() BackgroundSound:Destroy() CinematicBlur:Destroy()
+end)
+
+-- Start Animation (Fade In)
+TweenService:Create(CanvasGroup, TweenInfo.new(1), {GroupTransparency = 0}):Play()
+TweenService:Create(BackgroundSound, TweenInfo.new(1), {Volume = 0.5}):Play()
+TweenService:Create(CinematicBlur, TweenInfo.new(1), {Size = 16}):Play()
